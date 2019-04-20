@@ -97,4 +97,4 @@ if __name__ == "__main__":
     camera.open()
     while camera.is_running():
         a = main(camera, args)
-        main1(a, camera, args)
+        main1(a, camera)
