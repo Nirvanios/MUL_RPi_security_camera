@@ -12,3 +12,4 @@
     * [x] Contignous beeps
     * [ ] Melody?
 * [ ] Image server
+* [ ] Config file
