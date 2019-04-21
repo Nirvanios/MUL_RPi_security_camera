@@ -5,12 +5,14 @@ import imutils
 from imutils.video import FPS
 
 import Tracking
+import VideoUtils
 
 
 def init_arg_parse():
     parser = argparse.ArgumentParser(description="MUL project")
     parser.add_argument("--video", required=True, dest='video_path', type=str)
-    parser.add_argument("-a", required=True, dest='min_area', type=int)
+    parser.add_argument("--area", required=True, dest='min_area', type=int)
+    parser.add_argument("--tracker", default='kcf', dest='tracker', type=str)
     return parser
 
 
@@ -19,6 +21,8 @@ def main1(box, camera):
     fps = FPS().start()
     tracker = Tracking.Tracker()
     img = camera.capture_image()
+    if img is None:
+        return
     img = imutils.resize(img, width=500)
     cnt = 0
     tracker.tr.init(img, initBB)
@@ -48,18 +52,37 @@ def main1(box, camera):
 
 
 def main(camera, args):
-    avg = None
+    detector = Tracking.ChangeDetector(camera.capture_image(), (args.min_area, args.min_area * 3), 500)
+    searching = True
+    tracker = None
     while True:
         frame = camera.capture_image()
 
         if frame is None:
-            break
-
+            return None
         frame = imutils.resize(frame, width=500)
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
-        if avg is None:
+        if searching:
+            found, bb = detector.detect(frame)
+            if found:
+                print("found")
+                searching = False
+                tracker = Tracking.PersonTracker(args.tracker, frame, bb, 500)
+                continue
+            else:
+                print("not found")
+
+        if not searching:
+            success, box = tracker.update(frame)
+            if success:
+                print("success")
+                (x, y, w, h) = [int(v) for v in box]
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            else:
+                searching = True
+                print("not success")
+
+        """if avg is None:
             avg = gray.copy().astype("float")
             continue
 
@@ -85,16 +108,22 @@ def main(camera, args):
 
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         if bb is not None:
-            return bb
+            return bb"""
 
         cv2.imshow("Camera", frame)
         key = cv2.waitKey(1) & 0xFF
 
+
 if __name__ == "__main__":
     parser = init_arg_parse()
     args = parser.parse_args()
-    camera = Tracking.CameraMock(args.video_path)
+    camera = VideoUtils.CameraMock(args.video_path)
     camera.open()
-    while camera.is_running():
+    cv2.waitKey()
+    main(camera, args)
+
+    """while camera.is_running():
         a = main(camera, args)
-        main1(a, camera)
+        if a is None:
+            break
+        main1(a, camera)"""

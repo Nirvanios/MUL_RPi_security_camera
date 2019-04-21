@@ -1,43 +1,5 @@
 import cv2
-
-
-class CameraMock:
-    def __init__(self, file_path):
-        self.file_path = file_path
-
-    def open(self):
-        self.cap = cv2.VideoCapture(self.file_path)
-
-    def close(self):
-        self.cap.release()
-
-    def capture_image(self):
-        if self.cap.isOpened():
-            ret, frame = self.cap.read()
-            return frame
-        else:
-            return None
-
-    def is_running(self):
-        return self.cap.isOpened()
-
-    def get_resolution(self):
-        width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        return width, height
-
-
-class VideoWriter:
-    def __init__(self, dest_path, resolution, fps):
-        self.dest_path = dest_path
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        self.out = cv2.VideoWriter(dest_path, fourcc, fps, resolution)
-
-    def write_frame(self, frame):
-        self.out.write(frame)
-
-    def close(self):
-        self.out.release()
+import imutils
 
 
 class Tracker:
@@ -46,3 +8,65 @@ class Tracker:
 
     def track(self, frame):
         return self.tr.update(frame)
+
+
+class ChangeDetector:
+    def __init__(self, reference_img, area_limits: (int, int), resize, thresh=5):
+        self.resize = resize
+        gray = self.prepare_img(reference_img)
+        self.avg_img = gray.copy().astype("float")
+        self.area_limits = area_limits
+        self.thresh = thresh
+
+    def detect(self, img):
+        gray = self.prepare_img(img)
+        cv2.accumulateWeighted(gray, self.avg_img, 0.5)
+        frame_delta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg_img))
+
+        thresh = cv2.threshold(frame_delta, self.thresh, 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.dilate(thresh, None, iterations=2)
+        contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = imutils.grab_contours(contours)
+        max_area = 0
+        bounding_box = None
+        for c in contours:
+            area = cv2.contourArea(c)
+            (x, y, w, h) = cv2.boundingRect(c)
+            if self.area_limits[0] < area < self.area_limits[1] and area > max_area and h > w:
+                bounding_box = (x, y, w, h)
+                max_area = area
+
+        if bounding_box is not None:
+            return True, bounding_box
+
+        return False, None
+
+    def prepare_img(self, img):
+        img = imutils.resize(img, width=self.resize)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        return cv2.GaussianBlur(gray, (21, 21), 0)
+
+
+class PersonDetector:
+    pass
+
+
+OPENCV_OBJECT_TRACKERS = {
+    "csrt": cv2.TrackerCSRT_create,
+    "kcf": cv2.TrackerKCF_create,
+    "boosting": cv2.TrackerBoosting_create,
+    "tld": cv2.TrackerTLD_create,
+    "medianflow": cv2.TrackerMedianFlow_create,
+    "mosse": cv2.TrackerMOSSE_create
+}
+
+
+class PersonTracker:
+    def __init__(self, tracker_name: str, img, init_bb, resize):
+        self.tracker = OPENCV_OBJECT_TRACKERS[tracker_name]()
+        self.tracker.init(img, init_bb)
+        self.resize = resize
+
+    def update(self, img):
+        img = imutils.resize(img, width=self.resize)
+        return self.tracker.update(img)
