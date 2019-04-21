@@ -2,7 +2,6 @@ import argparse
 
 import cv2
 import imutils
-from imutils.video import FPS
 
 import Tracking
 import VideoUtils
@@ -14,41 +13,6 @@ def init_arg_parse():
     parser.add_argument("--area", required=True, dest='min_area', type=int)
     parser.add_argument("--tracker", default='kcf', dest='tracker', type=str)
     return parser
-
-
-def main1(box, camera):
-    initBB = box
-    fps = FPS().start()
-    tracker = Tracking.Tracker()
-    img = camera.capture_image()
-    if img is None:
-        return
-    img = imutils.resize(img, width=500)
-    cnt = 0
-    tracker.tr.init(img, initBB)
-    while img is not None:
-        cnt += 1
-        img = camera.capture_image()
-        img = imutils.resize(img, width=500)
-        if img is None:
-            return
-
-        if initBB is not None:
-            (success, box) = tracker.tr.update(img)
-
-            if success:
-                (x, y, w, h) = [int(v) for v in box]
-                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            else:
-                return
-
-            fps.update()
-            fps.stop()
-
-            print("Frame: " + str(cnt) + ", FPS: " + str(fps.fps()))
-
-        cv2.imshow("Camera", img)
-        key = cv2.waitKey(1) & 0xFF
 
 
 def main(camera, args):
@@ -119,8 +83,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
     camera = VideoUtils.CameraMock(args.video_path)
     camera.open()
-    cv2.waitKey()
-    main(camera, args)
+    det = Tracking.PersonDetector()
+
+    img = camera.capture_image()
+    while img is not None:
+        img = imutils.resize(img, width=500)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        rects, weights = det.detect(gray)
+        # rects = det.detect(gray)
+        for rect in rects:
+            (x, y, w, h) = rect
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.imshow("Camera", img)
+        key = cv2.waitKey(1) & 0xFF
+        img = camera.capture_image()
+
+    # main(camera, args)
 
     """while camera.is_running():
         a = main(camera, args)

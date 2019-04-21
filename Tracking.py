@@ -2,14 +2,6 @@ import cv2
 import imutils
 
 
-class Tracker:
-    def __init__(self):
-        self.tr = cv2.TrackerCSRT_create()
-
-    def track(self, frame):
-        return self.tr.update(frame)
-
-
 class ChangeDetector:
     def __init__(self, reference_img, area_limits: (int, int), resize, thresh=5):
         self.resize = resize
@@ -48,7 +40,16 @@ class ChangeDetector:
 
 
 class PersonDetector:
-    pass
+    def __init__(self):
+        self.hog = cv2.HOGDescriptor()
+        self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+
+    def detect(self, img, sub_area=None):
+        if sub_area is not None:
+            (x, y, w, h) = sub_area
+            img = img[y:y + h, x:x + w]
+        return self.hog.detectMultiScale(img, winStride=(4, 4),
+                                         padding=(8, 8), scale=1.05)
 
 
 OPENCV_OBJECT_TRACKERS = {
