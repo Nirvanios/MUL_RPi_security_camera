@@ -32,7 +32,7 @@ class Buzzer:
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(pin_number, GPIO.OUT)
         self.__pin_number = pin_number
-        self.p = GPIO.PWM(self.__pin_number, 2)
+        self.__pwm = GPIO.PWM(self.__pin_number, 2)
 
     def start_alarm(self):
         """
@@ -40,15 +40,15 @@ class Buzzer:
         :return: None
         """
         GPIO.output(self.__pin_number, True)
-        self.p.start(10)  # start the PWM on 100  percent duty cycle
-        self.p.ChangeDutyCycle(50)  # change the duty cycle to 90%
+        self.__pwm.start(10)  # start the PWM on 100  percent duty cycle
+        self.__pwm.ChangeDutyCycle(50)  # change the duty cycle to 90%
 
     def stop_alarm(self):
         """
         Stops alarm.
         :return: None
         """
-        self.p.stop()
+        self.__pwm.stop()
 
     def play_major_scale(self, speed):
         """
@@ -58,11 +58,11 @@ class Buzzer:
         """
         GPIO.output(self.__pin_number, True)
         time.sleep(speed)
-        self.p.start(0)
-        self.p.ChangeDutyCycle(90)
+        self.__pwm.start(0)
+        self.__pwm.ChangeDutyCycle(90)
 
         for frequency in Notes.major_scale:
-            self.p.ChangeFrequency(frequency)  # change the frequency to 261 Hz (floats also work)
+            self.__pwm.ChangeFrequency(frequency)  # change the frequency to 261 Hz (floats also work)
             time.sleep(speed)
 
     def __del__(self):
