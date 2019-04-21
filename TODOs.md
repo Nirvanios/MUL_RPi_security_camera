@@ -1,10 +1,14 @@
 # TODO list
 ## CV
-* Person recognition `WIP`
-* Face detection
+* [ ] Person recognition `WIP`
+* [ ] Face detection
 ## Various
-* Send notification
-    * Whole body shot
-    * Face
-    * Date & time
-* Sound alarm
+* [ ] Video from RPi cam
+* [ ] Send notification
+    * [ ] Whole body shot
+    * [ ] Face
+    * [x] Date & time
+* [ ] Sound alarm
+    * [x] Contignous beeps
+    * [ ] Melody?
+* [ ] Image server
