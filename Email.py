@@ -4,10 +4,12 @@ import datetime
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+from typing import List
 
 
 class Email:
-    """Class for sending emails.
+    """
+    Class for sending emails.
 
     Simple class that can send emails to specified email address.
     Mostly used for alarming user of movement in front of camera.
@@ -26,9 +28,13 @@ class Email:
         self.sender_password = sender_password
         self.sender_address = sender_address
         self.SSL_port = SSL_port
-        self.secure_context = ssl.create_default_context()
+        self.__secure_context = ssl.create_default_context()
 
-    def send_email(self, remote_addr: str, subject: str = "Movement detected", text_content: str = None, jpg_image: bytes = None):
+    def send_email(self, remote_addr: str,
+                   subject: str = "Movement detected",
+                   text_content: str = None,
+                   date_time: str = None,
+                   jpg_images: List[bytes] = None):
         """
         Method that sends desired email to recipient.
 
@@ -37,29 +43,36 @@ class Email:
                         Optional, default value is "Movement detected"
         :param text_content: Text content of email.
                              Optional, default value is warning about movement with current time and date.
-        :param jpg_image: Included image. Optional, default is no image.
+        :param date_time: Date that is written in email. Optional, default is datetime.now()
+        :param jpg_images: List of images to include. Optional, default is no image.
         :return: None
         """
-        datenow = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        if date_time is None:
+            date_time = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         if text_content is None:
             text_content = """\
-                            Warning! Detected movement on camera. Movement was captured at """ +\
-                            datenow\
-                            + """\
+                            Warning! Detected movement on camera. Movement was captured at """ + \
+                           date_time \
+                           + """\
                             and related images was saved to server.
                             """
+        else:
+            text_content += "\n" + date_time
         message = MIMEMultipart()
         message["Subject"] = subject
         message["From"] = self.sender_address
         message["To"] = remote_addr
         text = text_content
         message.attach(MIMEText(text, "plain"))
-        if jpg_image is not None:
-            img = MIMEImage(jpg_image)
-            img.add_header('Content-Disposition', "attachment", filename=datenow)
-            message.attach(img)
+        if jpg_images is not None:
+            index = 0
+            for image in jpg_images:
+                img = MIMEImage(image)
+                img.add_header('Content-Disposition', "attachment", filename="img" + str(index))
+                message.attach(img)
+                index += 1
 
-        with smtplib.SMTP_SSL(self.sender_smtp_server, self.SSL_port, context=self.secure_context) as server:
+        with smtplib.SMTP_SSL(self.sender_smtp_server, self.SSL_port, context=self.__secure_context) as server:
             server.login(self.sender_address, self.sender_password)
             server.sendmail(self.sender_address, remote_addr, message.as_string())
 
