@@ -11,5 +11,11 @@
 * [ ] Sound alarm
     * [x] Contignous beeps
     * [ ] Melody?
-* [ ] Image server
 * [ ] Config file
+## Image server
+* [ ] Image server
+    * [x] Receiving and deflate zip files
+    * [ ] Receive simple file
+* [ ] File sender
+    * [x] Sending zip files
+    * [ ] Sending simple file 
