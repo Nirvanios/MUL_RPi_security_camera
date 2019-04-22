@@ -13,7 +13,7 @@ class Sender:
         """
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def send_zip(self, remote_ipv4, remote_port, zip_file: bytes = None):
+    def send_zip(self, remote_ipv4, remote_port, zip_file: bytes):
         """
         Sends zip file to file server.
         After receiving file, its contents are unziped and copied into appropriate directory.
@@ -25,18 +25,27 @@ class Sender:
         """
         self.socket.connect((remote_ipv4, remote_port))
         file_size = len(zip_file)
-        self.socket.send(b"FILE/ZIP/" + str(file_size).encode())
+        self.socket.send(b"FILE/ZIP/" + str(file_size).encode() + b"/tmp.zip")
         response = self.socket.recv(512)
-        print(response)
+        self.__send_file(file_size, zip_file)
+        self.socket.close()
+
+    def send_standard_file(self, remote_ipv4, remote_port, file_name: str, file: bytes):
+        self.socket.connect((remote_ipv4, remote_port))
+        file_size = len(file)
+        self.socket.send(b"FILE/STD/" + str(file_size).encode() + b"/" + file_name.encode())
+        response = self.socket.recv(512)
+        self.__send_file(file_size, file)
+        self.socket.close()
+
+    def __send_file(self, file_size: int, file: bytes):
         for index in range(0, file_size, 512):
-            file_content = zip_file[index:index + 512]
-            print(len(file_content))
-            print(self.socket.send(file_content))
+            file_content = file[index:index + 512]
+            self.socket.send(file_content)
 
 
-""" TEST
+
 sender = Sender()
 with open("../large.zip", "rb") as file:
-    sender.send_zip("192.168.0.3", 10000, file.read())
+    sender.send_standard_file("192.168.0.3", 10000, "large.zip", file.read())
 
-"""

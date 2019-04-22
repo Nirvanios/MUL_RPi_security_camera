@@ -5,6 +5,7 @@ import re
 import zipfile
 import datetime
 import os
+import io
 
 
 def init_arg_parse():
@@ -38,21 +39,29 @@ class TCPMessageHandler(socketserver.StreamRequestHandler):
 
         message_string = self.request.recv(1024).strip()
         print("Handling..." + str(message_string))
-        if re.search(b"FILE/ZIP/", message_string):
-            file_size = int(re.split(b"FILE/ZIP/", message_string)[1].decode())
+        if re.search(b"FILE/.+/", message_string):
+            print(message_string)
+            file_size = int(re.search(b"(?<=FILE/(STD|ZIP)/)[0-9]+(?=/)", message_string).group(0).decode())
             self.wfile.write(b"ACK")
-            zip_path = self.dir_path + "tmp.zip"
-            with open(zip_path, "wb") as file:
+
+            file_content_path = self.dir_path + str(datetime.datetime.now().strftime("%Y-%m-%d %H") + ":00")
+            with io.BytesIO() as file:
                 for _ in range(0, file_size, 512):
                     file_content = self.request.recv(file_size)
                     file.write(file_content)
-            zip_content_path = self.dir_path + str(datetime.datetime.now().strftime("%Y-%m-%d %H") + ":00")
-            print(zip_content_path)
-            if not os.path.isdir(zip_content_path):
-                os.makedirs(zip_content_path)
-            with zipfile.ZipFile(zip_path, "r") as zip_ref:
-                zip_ref.extractall(zip_content_path)
-            os.remove(zip_path)
+
+                if not os.path.isdir(file_content_path):
+                    os.makedirs(file_content_path)
+
+                file.seek(0)
+                file_name = re.split(b"FILE/.+/.+/", message_string)[1].decode()
+                with open(file_content_path + "/" + file_name, "wb") as physical_file:
+                    physical_file.write(file.read())
+
+            if re.search(b"FILE/ZIP/", message_string):
+                with zipfile.ZipFile(file_content_path + "/" + file_name, "r") as zip_ref:
+                    zip_ref.extractall(file_content_path)
+                os.remove(file_content_path + "/" + file_name)
 
         if message_string == b"HELLO":
             # TODO Register desktop app
