@@ -39,13 +39,15 @@ class TCPMessageHandler(socketserver.StreamRequestHandler):
 
         message_string = self.request.recv(1024).strip()
         print("Handling..." + str(message_string))
-        if re.search(b"FILE/.+/", message_string):
-            print(message_string)
+        if re.search(b"FILE/.+/", message_string):  # Handling file
+
+            # find file size
             file_size = int(re.search(b"(?<=FILE/(STD|ZIP)/)[0-9]+(?=/)", message_string).group(0).decode())
+
             self.wfile.write(b"ACK")
 
             file_content_path = self.dir_path + str(datetime.datetime.now().strftime("%Y-%m-%d %H") + ":00")
-            with io.BytesIO() as file:
+            with io.BytesIO() as file:  # Receive file to buffer
                 for _ in range(0, file_size, 512):
                     file_content = self.request.recv(file_size)
                     file.write(file_content)
@@ -53,11 +55,13 @@ class TCPMessageHandler(socketserver.StreamRequestHandler):
                 if not os.path.isdir(file_content_path):
                     os.makedirs(file_content_path)
 
+                #  Saves file to disk
                 file.seek(0)
                 file_name = re.split(b"FILE/.+/.+/", message_string)[1].decode()
                 with open(file_content_path + "/" + file_name, "wb") as physical_file:
                     physical_file.write(file.read())
 
+            # if zip, deflate
             if re.search(b"FILE/ZIP/", message_string):
                 with zipfile.ZipFile(file_content_path + "/" + file_name, "r") as zip_ref:
                     zip_ref.extractall(file_content_path)

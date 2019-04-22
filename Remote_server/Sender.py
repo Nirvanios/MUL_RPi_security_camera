@@ -1,4 +1,3 @@
-import os
 import socket
 
 
@@ -31,6 +30,15 @@ class Sender:
         self.socket.close()
 
     def send_standard_file(self, remote_ipv4, remote_port, file_name: str, file: bytes):
+        """
+        Sends simple file to file server. Server wont unpack just saves.
+
+        :param remote_ipv4: File server ipv4 address.
+        :param remote_port: FIle server port.
+        :param file_name: Name of the file.
+        :param file: File to send.
+        :return: None
+        """
         self.socket.connect((remote_ipv4, remote_port))
         file_size = len(file)
         self.socket.send(b"FILE/STD/" + str(file_size).encode() + b"/" + file_name.encode())
@@ -39,13 +47,20 @@ class Sender:
         self.socket.close()
 
     def __send_file(self, file_size: int, file: bytes):
+        """
+        Private function for file sending
+
+        :param file_size: Size of file in bytes
+        :param file: Actual file
+        :return: None
+        """
         for index in range(0, file_size, 512):
             file_content = file[index:index + 512]
             self.socket.send(file_content)
 
 
-
+""" TEST
 sender = Sender()
 with open("../large.zip", "rb") as file:
     sender.send_standard_file("192.168.0.3", 10000, "large.zip", file.read())
-
+"""
