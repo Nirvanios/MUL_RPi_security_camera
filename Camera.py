@@ -22,7 +22,7 @@ class Camera:
 
     def capture_image(self):
         """
-        Captures image and returns it as numpy array
+        Captures bgr image and returns it as numpy array
         :return: numpy array with image.
         """
         stream = io.BytesIO()
