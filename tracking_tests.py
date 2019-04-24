@@ -1,10 +1,14 @@
 import argparse
+import time
 
 import cv2
 import imutils
 
+import Camera
 import Tracking
 import VideoUtils
+
+writer = None
 
 
 def init_arg_parse():
@@ -17,8 +21,10 @@ def init_arg_parse():
 
 def main(camera, args):
     detector = Tracking.ChangeDetector(camera.capture_image(), (args.min_area, args.min_area * 3), 500)
+    det = Tracking.PersonDetector()
     searching = True
     tracker = None
+    hog_fail_cnt = 0
     while True:
         frame = camera.capture_image()
 
@@ -29,6 +35,10 @@ def main(camera, args):
         if searching:
             found, bb = detector.detect(frame)
             if found:
+                rects, _ = det.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), bb)
+                if len(rects) != 0:
+                    bb = rects[0]
+                    print("hog found in searching")
                 print("found")
                 searching = False
                 tracker = Tracking.PersonTracker(args.tracker, frame, bb, 500)
@@ -41,67 +51,47 @@ def main(camera, args):
             if success:
                 print("success")
                 (x, y, w, h) = [int(v) for v in box]
+                rects, weights = det.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (x - 20, y - 20, w + 40, h + 40))
+                if len(rects) != 0:
+                    (x, y, w, h) = rects[0]
+                    tracker = Tracking.PersonTracker(args.tracker, frame, (x, y, w, h), 500)
+                    print("hog found in searching")
+                    hog_fail_cnt = 0
+                else:
+                    hog_fail_cnt += 1
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             else:
                 searching = True
                 print("not success")
 
-        """if avg is None:
-            avg = gray.copy().astype("float")
-            continue
-
-        cv2.accumulateWeighted(gray, avg, 0.3)
-        frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-
-        thresh = cv2.threshold(frameDelta, 5, 255,
-                               cv2.THRESH_BINARY)[1]
-        thresh = cv2.dilate(thresh, None, iterations=2)
-        cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-                                cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
-        last_area = 0
-        bb = None
-        for c in cnts:
-            area = cv2.contourArea(c)
-            (x, y, w, h) = cv2.boundingRect(c)
-            if area > args.min_area and x > 10 and x < 130 and area > last_area:
-                bb = (x, y, w, h)
-                last_area = area
-            else:
-                continue
-
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        if bb is not None:
-            return bb"""
-
-        cv2.imshow("Camera", frame)
+            if hog_fail_cnt == 50:
+                print("set searching true")
+                hog_fail_cnt = 0
+                searching = True
+            writer.write_frame(frame)
         key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            break
 
 
 if __name__ == "__main__":
     parser = init_arg_parse()
     args = parser.parse_args()
-    camera = VideoUtils.CameraMock(args.video_path)
-    camera.open()
+    # camera = VideoUtils.CameraMock(args.video_path)
+    # camera.open()
+    writer = VideoUtils.VideoWriter("/home/pi/Desktop/out/test.mp4", (640, 480), 10.0)
+
     det = Tracking.PersonDetector()
 
-    img = camera.capture_image()
-    while img is not None:
-        img = imutils.resize(img, width=500)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        rects, weights = det.detect(gray)
-        # rects = det.detect(gray)
-        for rect in rects:
-            (x, y, w, h) = rect
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.imshow("Camera", img)
-        key = cv2.waitKey(1) & 0xFF
-        img = camera.capture_image()
-
-    # main(camera, args)
-
-    """while camera.is_running():
-        a = main(camera, args)
-        if a is None:
-            break
-        main1(a, camera)"""
+    # img = camera.capture_image()
+    try:
+        # main(camera, args)
+        cam = Camera.Camera()
+        while True:
+            start_time = time.time()
+            frame = cam.capture_image()
+            # frame = imutils.resize(frame, width=500)
+            writer.write_frame(frame)
+            print("FPS: ", 1.0 / (time.time() - start_time))
+    finally:
+        writer.close()

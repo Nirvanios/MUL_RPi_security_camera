@@ -47,9 +47,18 @@ class PersonDetector:
     def detect(self, img, sub_area=None):
         if sub_area is not None:
             (x, y, w, h) = sub_area
+            if x < 0:
+                x = 0
+            if y < 0:
+                y = 0
             img = img[y:y + h, x:x + w]
-        return self.hog.detectMultiScale(img, winStride=(4, 4),
-                                         padding=(8, 8), scale=1.05)
+        rects, weights = self.hog.detectMultiScale(img, winStride=(8, 8),
+                                                   padding=(20, 20), scale=1.05, hitThreshold=0.1)
+        if sub_area is not None:
+            for rect in rects:
+                rect[0] += x
+                rect[1] += y
+        return rects, weights
 
 
 OPENCV_OBJECT_TRACKERS = {
@@ -71,3 +80,24 @@ class PersonTracker:
     def update(self, img):
         img = imutils.resize(img, width=self.resize)
         return self.tracker.update(img)
+
+
+class FaceDetector:
+    def __init__(self):
+        self.detector = cv2.CascadeClassifier('/Users/petr/Desktop/haarcascade_frontalface_alt.xml')
+
+    def detect(self, img, sub_area=None):
+        if sub_area is not None:
+            (x, y, w, h) = sub_area
+            if x < 0:
+                x = 0
+            if y < 0:
+                y = 0
+            img = img[y:y + h, x:x + w]
+
+        rects = self.detector.detectMultiScale(img)
+        if sub_area is not None:
+            for rect in rects:
+                rect[0] += x
+                rect[1] += y
+        return rects
