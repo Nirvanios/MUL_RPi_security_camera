@@ -13,10 +13,9 @@
     * [ ] Melody?
 * [ ] Config file
 * [ ] Threads
-    * [ ] Camera
-    * [ ] Detection
+    * [ ] Camera & detection
     * [ ] File saving & network
-    * [ ] Task thread
+    * [ ] Task threadpool
 ## Image server
 * [ ] Image server
     * [x] Receiving and deflate zip files
