@@ -12,6 +12,11 @@
     * [x] Contignous beeps
     * [ ] Melody?
 * [ ] Config file
+* [ ] Threads
+    * [ ] Camera
+    * [ ] Detection
+    * [ ] File saving & network
+    * [ ] Task thread
 ## Image server
 * [ ] Image server
     * [x] Receiving and deflate zip files
