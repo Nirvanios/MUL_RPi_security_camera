@@ -1,12 +1,12 @@
 # TODO list
 ## CV
-* [ ] Person recognition `WIP`
-* [ ] Face detection
+* [x] Person recognition
+* [ ] Face detection `NOPE`
 ## Various
-* [ ] Video from RPi cam
+* [ ] Video from RPi cam `WIP peťa`
 * [ ] Send notification
-    * [ ] Whole body shot
-    * [ ] Face
+    * [ ] Whole body shot `WIP peťa`
+    * [ ] Face `NOPE`
     * [x] Date & time
 * [ ] Sound alarm
     * [x] Contignous beeps
