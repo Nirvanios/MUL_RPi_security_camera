@@ -24,10 +24,12 @@ class ChangeDetector:
         for c in contours:
             area = cv2.contourArea(c)
             (x, y, w, h) = cv2.boundingRect(c)
-            if self.area_limits[0] < area < self.area_limits[1] and area > max_area and h > w:
+
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            if self.area_limits[0] < area < self.area_limits[1] and w * 3.0 > h > 1.5 * w and area > max_area:
                 bounding_box = (x, y, w, h)
                 max_area = area
-
+        cv2.imshow("b", thresh)
         if bounding_box is not None:
             return True, bounding_box
 
