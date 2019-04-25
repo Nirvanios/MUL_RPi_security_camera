@@ -9,13 +9,13 @@
     * [ ] Face `NOPE`
     * [x] Date & time
 * [ ] Sound alarm
-    * [x] Contignous beeps
+    * [x] Continuous beeps
     * [ ] Melody?
 * [ ] Config file
 * [ ] Threads
     * [ ] Camera & detection
     * [ ] File saving & network
-    * [ ] Task threadpool
+    * [ ] Task thread pool
 ## Image server
 * [ ] Image server
     * [x] Receiving and deflate zip files
