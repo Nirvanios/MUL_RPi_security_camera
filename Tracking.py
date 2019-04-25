@@ -1,7 +1,73 @@
 import cv2
 import imutils
 
+from GeometryUtils import BoundingBox
 
+
+class TrackedObject:
+    def __init__(self, start_time, video_location=None):
+        self.__bb = None
+        self.__lost_time = None
+        self.__start_time = start_time
+        self.__lost_frame_cnt = 0
+        if video_location is not None:
+            self.__video_location = video_location
+
+    def set_last_position(self, bb: BoundingBox):
+        self.__bb = bb
+
+    def get_last_position(self):
+        return self.__bb
+
+    def inc_lost(self):
+        self.__lost_frame_cnt += 1
+
+    def reset_lost(self):
+        self.__lost_frame_cnt = 0
+
+    def get_lost_cnt(self):
+        return self.__lost_frame_cnt
+
+    def mark_lost(self, lost_time):
+        self.__lost_time = lost_time
+
+    def get_video_location(self):
+        return self.__video_location
+
+    def to_string(self):
+        return "Appeared: " + str(self.__start_time) + ", lost: " + str(self.__lost_time)
+
+
+class ChangeLocator:
+    def __init__(self, reference_img, thresh=5):
+        gray = self.prepare_img(reference_img)
+        self.avg_img = gray.copy().astype("float")
+        self.thresh = thresh
+
+    def detect_change(self, img):
+        gray = self.prepare_img(img)
+        cv2.accumulateWeighted(gray, self.avg_img, 0.5)
+        frame_delta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg_img))
+
+        thresh = cv2.threshold(frame_delta, self.thresh, 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.dilate(thresh, None, iterations=2)
+
+        contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = imutils.grab_contours(contours)
+        bbs = []
+        for c in contours:
+            bbs.append(cv2.boundingRect(c))
+
+        return bbs
+
+    def prepare_img(self, img):
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        return cv2.GaussianBlur(gray, (21, 21), 0)
+
+
+#######################################
+############### UNUSED ################
+#######################################
 class ChangeDetector:
     def __init__(self, reference_img, area_limits: (int, int), resize, thresh=5):
         self.resize = resize
