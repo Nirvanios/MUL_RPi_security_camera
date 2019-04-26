@@ -1,9 +1,12 @@
+import argparse
 import datetime
+import math
 import threading
 from enum import Enum
 from queue import Queue
 
 import cv2
+import numpy as np
 
 import mulconfig
 import npcamera
@@ -148,15 +151,51 @@ def on_saving_done(file_path: str, start_time, end_time, bbs):
     l.log(LogLevel.DEBUG, "Saving done, notifying...")
 
 
-def main():
-    config = mulconfig.Config('./config.json')
-    detection_thread = threading.Thread(target=detect_and_notify, args=(config,))
-    detection_thread.start()
+def init_arg_parse():
+    parser = argparse.ArgumentParser(description="MUL project")
+    parser.add_argument("--config", dest='show_config', action='store_true')
+    return parser
 
-    saving_thread = threading.Thread(target=acquire_and_save, args=(config, on_saving_done))
-    saving_thread.start()
-    saving_thread.join()
-    detection_thread.join()
+
+def main():
+    parser = init_arg_parse()
+    args = parser.parse_args()
+    config = mulconfig.Config('./config.json')
+    if args.show_config:
+        width, height = config.get_value("cv.resolution.width"), config.get_value("cv.resolution.height")
+        camera = npcamera.Camera((width, height))
+        img = camera.capture_image()
+        to_show = np.copy(img)
+        min_ratio = config.get_value("cv.min_ratio")
+        half_width = width // 2
+        cv2.rectangle(to_show, (0, 0), (int(half_width * min_ratio), half_width), (0, 255, 0), 2)
+        cv2.imshow("min_ratio", to_show)
+        to_show = np.copy(img)
+        max_ratio = config.get_value("cv.max_ratio")
+        cv2.rectangle(to_show, (0, 0), (int(half_width * max_ratio), half_width), (0, 255, 0), 2)
+        cv2.imshow("max_ratio", to_show)
+        to_show = np.copy(img)
+        ratio = (min_ratio + max_ratio) / 2
+        min_area = config.get_value("cv.min_area")
+        h = int(math.sqrt(min_area / ratio))
+        w = int(h * ratio)
+        cv2.rectangle(to_show, (0, 0), (w, h), (0, 255, 0), 2)
+        cv2.imshow("min_area", to_show)
+        to_show = np.copy(img)
+        max_area = config.get_value("cv.max_area")
+        h = int(math.sqrt(max_area / ratio))
+        w = int(h * ratio)
+        cv2.rectangle(to_show, (0, 0), (w, h), (0, 255, 0), 2)
+        cv2.imshow("max_area", to_show)
+        cv2.waitKey()
+    else:
+        detection_thread = threading.Thread(target=detect_and_notify, args=(config,))
+        detection_thread.start()
+
+        saving_thread = threading.Thread(target=acquire_and_save, args=(config, on_saving_done))
+        saving_thread.start()
+        saving_thread.join()
+        detection_thread.join()
 
 
 if __name__ == "__main__":
