@@ -11,10 +11,12 @@
     "threshold": 0,
     "min_ratio": 0.0,
     "max_ratio": 0.0,
+    "bb_max_distance": 0,
     "resolution": {
       "width": 640,
       "height": 480
-    }
+    },
+    "lost_frames_max": 20
   },
   "save_location": "path",
   "debug": true

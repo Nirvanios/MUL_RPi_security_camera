@@ -34,6 +34,9 @@ class TrackedObject:
     def get_video_location(self):
         return self.__video_location
 
+    def get_times(self):
+        return self.__start_time, self.__lost_time
+
     def to_string(self):
         return "Appeared: " + str(self.__start_time) + ", lost: " + str(self.__lost_time)
 
@@ -57,7 +60,7 @@ class ChangeLocator:
         contours = imutils.grab_contours(contours)
         bbs = []
         for c in contours:
-            bbs.append(cv2.boundingRect(c))
+            bbs.append(BoundingBox.create_cv(cv2.boundingRect(c)))
 
         return bbs
 
