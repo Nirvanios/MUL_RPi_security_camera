@@ -11,7 +11,8 @@
 * [ ] Sound alarm
     * [x] Continuous beeps
     * [ ] Melody?
-* [ ] Config file
+* [x] Config file 
+    * [ ] Config object `WIP peťa`
 * [ ] Threads
     * [ ] Camera & detection
     * [ ] File saving & network
