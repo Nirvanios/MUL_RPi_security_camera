@@ -2,7 +2,8 @@
   "e-mail": {
     "smtp": "smtp",
     "port": 0,
-    "e-mail": "example@example.com"
+    "e-mail": "example@example.com",
+    "password": "pass"
   },
   "cv": {
     "min_area": 0,
