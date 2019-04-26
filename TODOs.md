@@ -15,7 +15,7 @@
 * [x] Config file 
     * [x] Config object
 * [ ] Threads
-    * [ ] Camera & detection `WIP peťa`
+    * [ ] Camera & detection `TODO test`
     * [ ] File saving & network `File saving done, network todo igor`
 ## Image server
 * [ ] Image server
