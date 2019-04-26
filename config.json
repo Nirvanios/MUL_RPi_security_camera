@@ -1,0 +1,19 @@
+{
+  "e-mail": {
+    "smtp": "smtp",
+    "port": 0,
+    "e-mail": "example@example.com"
+  },
+  "cv": {
+    "min_area": 0,
+    "max_area": 0,
+    "threshold": 0,
+    "min_ratio": 0.0,
+    "max_ratio": 0.0,
+    "resolution": {
+      "width": 640,
+      "height": 480
+    }
+  },
+  "debug": true
+}
