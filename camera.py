@@ -1,8 +1,9 @@
 import io
 import time
-import picamera
-import numpy as np
 from typing import Tuple
+
+import numpy as np
+import picamera
 
 
 class Camera:

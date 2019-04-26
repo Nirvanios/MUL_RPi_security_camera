@@ -5,10 +5,11 @@ import time
 import cv2
 import imutils
 
-import Camera
-import Tracking
-import VideoUtils
-from GeometryUtils import BoundingBox
+import tracking
+import videoutils
+from geometryutils import BoundingBox
+
+# import Camera
 
 writer = None
 
@@ -25,8 +26,8 @@ def init_arg_parse():
 
 
 def __unused__old_main(camera, args):
-    detector = Tracking.ChangeDetector(camera.capture_image(), (args.min_area, args.min_area * 3), 480)
-    det = Tracking.PersonDetector()
+    detector = tracking.ChangeDetector(camera.capture_image(), (args.min_area, args.min_area * 3), 480)
+    det = tracking.PersonDetector()
     searching = True
     tracker = None
     hog_fail_cnt = 0
@@ -46,8 +47,8 @@ def __unused__old_main(camera, args):
                     bb = rects[0]
                     print("hog found in searching")
                 print("found")
-                # searching = False
-                tracker = Tracking.PersonTracker(args.tracker, frame, bb, 480)
+                earching = False
+                tracker = tracking.PersonTracker(args.tracker, frame, bb, 480)
                 continue
             else:
                 print("not found")
@@ -60,7 +61,7 @@ def __unused__old_main(camera, args):
                 rects, weights = det.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (x - 20, y - 20, w + 40, h + 40))
                 if len(rects) != 0:
                     (x, y, w, h) = rects[0]
-                    tracker = Tracking.PersonTracker(args.tracker, frame, (x, y, w, h), 480)
+                    tracker = tracking.PersonTracker(args.tracker, frame, (x, y, w, h), 480)
                     print("hog found in searching")
                     hog_fail_cnt = 0
                 else:
@@ -86,14 +87,14 @@ def __unused__old_main(camera, args):
 
 def alt_main(camera, args):
     img = camera.capture_image()
-    detector = Tracking.ChangeLocator(img, 5)
+    detector = tracking.ChangeLocator(img, 5)
     tracked = None
     while img is not None:
         start_time = time.time()
         bbs = detector.detect_change(img)
         if len(bbs) > 0:
             if tracked is None:
-                tracked = Tracking.TrackedObject(datetime.datetime.now())
+                tracked = tracking.TrackedObject(datetime.datetime.now())
             else:
                 tracked.reset_lost()
             boxes = []
@@ -133,6 +134,7 @@ def alt_main(camera, args):
                     tracked = None
         if args.imshow:
             cv2.imshow("test", img)
+            cv2.waitKey(1)
         if args.fps:
             print("FPS:", 1.0 / (time.time() - start_time))
         img = camera.capture_image()
@@ -141,11 +143,11 @@ def alt_main(camera, args):
 if __name__ == "__main__":
     parser = init_arg_parse()
     args = parser.parse_args()
-    # cam = VideoUtils.CameraMock('/Users/petr/Desktop/test2.mp4')
-    cam = Camera.Camera()
+    cam = videoutils.CameraMock('/Users/petr/Desktop/test.mp4')
+    # cam = Camera.Camera()
     try:
         if args.bb_dist == 0:
-            writer = VideoUtils.VideoWriter("/home/pi/Desktop/out/test_out.avi", (480, 480), 30.0)
+            writer = videoutils.VideoWriter("/home/pi/Desktop/out/test_out.avi", (480, 480), 30.0)
             try:
                 __unused__old_main(cam, args)
             finally:

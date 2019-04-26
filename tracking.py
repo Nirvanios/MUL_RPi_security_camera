@@ -1,7 +1,7 @@
 import cv2
 import imutils
 
-from GeometryUtils import BoundingBox
+from geometryutils import BoundingBox
 
 
 class TrackedObject:
@@ -51,6 +51,7 @@ class ChangeLocator:
 
         thresh = cv2.threshold(frame_delta, self.thresh, 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.dilate(thresh, None, iterations=2)
+        cv2.imshow("t", thresh)
 
         contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = imutils.grab_contours(contours)
@@ -62,7 +63,7 @@ class ChangeLocator:
 
     def prepare_img(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        return cv2.GaussianBlur(gray, (21, 21), 0)
+        return cv2.GaussianBlur(gray, (13, 13), 0)
 
 
 #######################################
