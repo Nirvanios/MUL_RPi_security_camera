@@ -1,6 +1,7 @@
 # TODO list
 ## CV
 * [x] Person recognition
+    * [ ] Interpolate tracking when lost `WIP peťa`
 * [ ] Face detection `NOPE`
 ## Various
 * [ ] Video from RPi cam `WIP peťa`
@@ -12,7 +13,7 @@
     * [x] Continuous beeps
     * [ ] Melody?
 * [x] Config file 
-    * [x] Config object `WIP peťa`
+    * [x] Config object
 * [ ] Threads
     * [ ] Camera & detection
     * [ ] File saving & network
