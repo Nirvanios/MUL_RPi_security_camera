@@ -4,7 +4,7 @@
     * [ ] Interpolate tracking when lost `WIP peťa`
 * [ ] Face detection `NOPE`
 ## Various
-* [ ] Video from RPi cam `WIP peťa`
+* [x] Video from RPi cam
 * [ ] Send notification
     * [ ] Whole body shot `WIP peťa`
     * [ ] Face `NOPE`
@@ -14,8 +14,8 @@
     * [ ] Melody? `NOPE`
 * [x] Config file 
     * [x] Config object
-* [ ] Threads
-    * [ ] Camera & detection `TODO test`
+* [x] Threads
+    * [x] Camera & detection
     * [ ] File saving & network `File saving done, network todo igor`
 ## Image server
 * [ ] Image server
