@@ -11,13 +11,12 @@
     * [x] Date & time
 * [ ] Sound alarm
     * [x] Continuous beeps
-    * [ ] Melody?
+    * [ ] Melody? `NOPE`
 * [x] Config file 
     * [x] Config object
 * [ ] Threads
-    * [ ] Camera & detection
-    * [ ] File saving & network `WIP peťa`
-    * [ ] Task thread pool
+    * [ ] Camera & detection `WIP peťa`
+    * [ ] File saving & network `File saving done, network todo igor`
 ## Image server
 * [ ] Image server
     * [x] Receiving and deflate zip files
