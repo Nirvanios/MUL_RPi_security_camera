@@ -12,7 +12,7 @@
     * [x] Continuous beeps
     * [ ] Melody?
 * [x] Config file 
-    * [ ] Config object `WIP peťa`
+    * [x] Config object `WIP peťa`
 * [ ] Threads
     * [ ] Camera & detection
     * [ ] File saving & network
