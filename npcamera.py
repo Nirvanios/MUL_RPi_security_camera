@@ -1,7 +1,5 @@
-import io
 import time
 from typing import Tuple
-
 import numpy as np
 import picamera
 
@@ -17,19 +15,18 @@ class Camera:
         :param resolution: Resolution of captured images.
         """
         self.__camera = picamera.PiCamera()
-        self.__resolution = resolution
         self.__camera.resolution = resolution
-        time.sleep(2)
+        time.sleep(0.1)
 
     def capture_image(self):
         """
         Captures bgr image and returns it as numpy array
         :return: numpy array with image.
         """
-        stream = io.BytesIO()
-        self.__camera.capture(stream, format="bgr", use_video_port=True)
-        fwidth = (self.__resolution[0] + 31) // 32 * 32
-        fheight = (self.__resolution[1] + 15) // 16 * 16
-        image = np.fromstring(stream.getvalue(), dtype=np.uint8) \
-                    .reshape((fheight, fwidth, 3))[:self.__resolution[0], :self.__resolution[1], :]
+        image_size = self.__camera.resolution[::-1]
+        capture_width = (image_size[0] + 31) // 32 * 32
+        capture_height = (image_size[1] + 15) // 16 * 16
+        image = np.empty((capture_width, capture_height, 3), dtype=np.uint8)
+        self.__camera.capture(image, format="bgr", use_video_port=True)
+        image = image[:image_size[0], :image_size[1], :]
         return image
