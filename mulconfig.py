@@ -7,7 +7,7 @@ class Config:
         """
         json_file = open(path_to_file)
         json_content = json_file.read()
-        self.__config = json.load(json_content)[0]
+        self.__config = json.loads(json_content)
 
     def get_value(self, key: str):
         """Get value from config.
