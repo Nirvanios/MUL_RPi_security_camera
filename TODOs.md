@@ -16,7 +16,7 @@
     * [x] Config object
 * [ ] Threads
     * [ ] Camera & detection
-    * [ ] File saving & network
+    * [ ] File saving & network `WIP peťa`
     * [ ] Task thread pool
 ## Image server
 * [ ] Image server
