@@ -2,6 +2,7 @@ import argparse
 import datetime
 import math
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from queue import Queue
 
@@ -13,6 +14,9 @@ import npcamera
 import tracking
 import videoutils
 from logger import logger_instance as l, LogLevel
+from emailsender import Email
+from Remote_server.Sender import Sender
+from buzzer import Buzzer
 
 
 class QueueItem(Enum):
@@ -116,6 +120,8 @@ def acquire_and_save(config: mulconfig.Config, on_saving_done):
     frame_cnt = 0
     resolution = config.get_value("cv.resolution.width"), config.get_value("cv.resolution.height")
     bbs = []
+    thread_pool = ThreadPoolExecutor(max_workers=2)
+    buzzer = Buzzer()
     while True:
         (item_type, item) = saving_queue.get()
         if state == SaveThreadState.waiting:
@@ -123,6 +129,7 @@ def acquire_and_save(config: mulconfig.Config, on_saving_done):
                 writer = videoutils.VideoWriter(config.get_value("save_location") + item, resolution, 7.0)
                 state = SaveThreadState.saving_imgs
                 l.log(LogLevel.DEBUG, "Start saving")
+                buzzer.start_alarm()
             else:
                 l.log(LogLevel.ERROR,
                       "Invalid item type in saving thread. State: " + state.name + " item type: " + item_type.name)
@@ -138,8 +145,9 @@ def acquire_and_save(config: mulconfig.Config, on_saving_done):
             elif item_type is QueueItem.file_end:
                 writer.close()
                 state = SaveThreadState.waiting
-                on_saving_done(writer.dest_path, item[0], item[1], bbs)
+                thread_pool.submit(on_saving_done, config, writer.dest_path, item[0], item[1], bbs)
                 l.log(LogLevel.DEBUG, "Saving finished to:" + writer.dest_path)
+                buzzer.stop_alarm()
                 frame_cnt = 0
                 bbs.clear()
             else:
@@ -147,8 +155,20 @@ def acquire_and_save(config: mulconfig.Config, on_saving_done):
                       "Invalid item type in saving thread. State: " + state.name + " item type: " + item_type.name)
 
 
-def on_saving_done(file_path: str, start_time, end_time, bbs):
+def on_saving_done(config: mulconfig.Config, file_path: str, start_time, end_time, bbs):
     l.log(LogLevel.DEBUG, "Saving done, notifying...")
+    time_duration = str(start_time) + " - " + str(end_time)
+    email_sender = Email(config.get_value("e-mail.e-mail"),
+                         config.get_value("e-mail.password"),
+                         config.get_value("e-mail.smtp"),
+                         config.get_value("e-mail.port"))
+    file_sender = Sender()
+    email_sender.send_email(config.get_value("e-mail.e-mail"), date_time=time_duration)
+    with open(file_path, "rb") as file:
+        file_sender.send_standard_file(config.get_value("file_server.ipv4"),
+                                       config.get_value("file_server.port"),
+                                       time_duration + ".mp4",
+                                       file.read())
 
 
 def init_arg_parse():

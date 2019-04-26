@@ -5,6 +5,10 @@
     "e-mail": "example@example.com",
     "password": "pass"
   },
+    "file_server": {
+    "ipv4": "192.168.0.3",
+    "port": 50000
+  },
   "cv": {
     "min_area": 1000,
     "max_area": 40000,
