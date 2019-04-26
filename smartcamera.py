@@ -120,7 +120,7 @@ def acquire_and_save(config: mulconfig.Config, on_saving_done):
         (item_type, item) = saving_queue.get()
         if state == SaveThreadState.waiting:
             if item_type is QueueItem.file_start:
-                writer = videoutils.VideoWriter(config.get_value("save_location") + item, resolution, 12.0)
+                writer = videoutils.VideoWriter(config.get_value("save_location") + item, resolution, 7.0)
                 state = SaveThreadState.saving_imgs
                 l.log(LogLevel.DEBUG, "Start saving")
             else:

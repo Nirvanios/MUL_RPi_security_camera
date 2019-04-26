@@ -6,10 +6,10 @@
     "password": "pass"
   },
   "cv": {
-    "min_area": 4000,
-    "max_area": 200000,
+    "min_area": 1000,
+    "max_area": 40000,
     "threshold": 5,
-    "min_ratio": 0.2,
+    "min_ratio": 0.3,
     "max_ratio": 0.8,
     "bb_max_distance": 90,
     "resolution": {

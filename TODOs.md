@@ -1,12 +1,12 @@
 # TODO list
 ## CV
 * [x] Person recognition
-    * [ ] Interpolate tracking when lost `WIP peťa`
+    * [ ] Interpolate tracking when lost `NOPE`
 * [ ] Face detection `NOPE`
 ## Various
 * [x] Video from RPi cam
 * [ ] Send notification
-    * [ ] Whole body shot `WIP peťa`
+    * [ ] Whole body shot 
     * [ ] Face `NOPE`
     * [x] Date & time
 * [ ] Sound alarm
