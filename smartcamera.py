@@ -13,6 +13,9 @@ from logger import logger_instance as l, LogLevel
 
 
 class QueueItem(Enum):
+    """
+    Types of messages allowed in queue.
+    """
     # str with file name
     file_start = 1
     # tuple of image and bounding box
@@ -26,10 +29,14 @@ class SaveThreadState(Enum):
     saving_imgs = 2
 
 
+# queue for communication between detection and file handling thread
 saving_queue = Queue()
 
 
 def combine_boxes(boxes, config):
+    """
+    Reduce bounding boxes to bigger ones.
+    """
     change = True
     while change:
         change = False
@@ -46,6 +53,10 @@ def combine_boxes(boxes, config):
 
 
 def find_person(boxes, config):
+    """
+    Find bounding box most likely to contain a person.
+    :return: bounding box if conditions are met, otherwise None
+    """
     boxes = combine_boxes(boxes, config)
     fin = None
     for box in boxes:
@@ -61,6 +72,9 @@ def find_person(boxes, config):
 
 
 def detect_and_notify(config: mulconfig.Config):
+    """
+    Periodically detect changes in video stream from camera. Notify other thread using saving_queue.
+    """
     camera = npcamera.Camera((config.get_value("cv.resolution.width"), config.get_value("cv.resolution.height")))
     locator = tracking.ChangeLocator(camera.capture_image())
     tracked = None

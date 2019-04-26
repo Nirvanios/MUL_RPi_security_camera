@@ -2,6 +2,9 @@ import numpy as np
 
 
 def euclidean_distance(a, b):
+    """
+    Calculate euclidean distance between two points
+    """
     return np.sqrt(pow(a[0] - b[0], 2) + pow(a[1] - b[1], 2))
 
 
