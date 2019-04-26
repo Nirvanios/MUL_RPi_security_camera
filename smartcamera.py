@@ -5,6 +5,8 @@ from queue import Queue
 import cv2
 
 import mulconfig
+import npcamera
+import tracking
 import videoutils
 from logger import logger_instance as l, LogLevel
 
@@ -27,7 +29,11 @@ saving_queue = Queue()
 
 
 def detect_and_notify(config: mulconfig.Config):
-    pass
+    camera = npcamera.Camera((config.get_value("cv.resolution.width"), config.get_value("cv.resolution.height")))
+    locator = tracking.ChangeLocator(camera.capture_image())
+    while True:
+        bbs = locator.detect_change(camera.capture_image())
+
 
 
 def acquire_and_save(config: mulconfig.Config, on_saving_done):
