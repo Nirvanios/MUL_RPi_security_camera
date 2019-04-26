@@ -2,6 +2,7 @@ import argparse
 import datetime
 import math
 import threading
+import random
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from queue import Queue
@@ -145,7 +146,7 @@ def acquire_and_save(config: mulconfig.Config, on_saving_done):
             elif item_type is QueueItem.file_end:
                 writer.close()
                 state = SaveThreadState.waiting
-                thread_pool.submit(on_saving_done, config, writer.dest_path, item[0], item[1], bbs)
+                thread_pool.submit(on_saving_done, config, writer.dest_path, item[0], item[1], bbs[:])
                 l.log(LogLevel.DEBUG, "Saving finished to:" + writer.dest_path)
                 buzzer.stop_alarm()
                 frame_cnt = 0
@@ -157,18 +158,31 @@ def acquire_and_save(config: mulconfig.Config, on_saving_done):
 
 def on_saving_done(config: mulconfig.Config, file_path: str, start_time, end_time, bbs):
     l.log(LogLevel.DEBUG, "Saving done, notifying...")
-    time_duration = str(start_time) + " - " + str(end_time)
+    time_duration = str(start_time.strftime("%Y-%m-%d %H:%M:%S")) + " - " + str(end_time.strftime("%Y-%m-%d %H:%M:%S"))
     email_sender = Email(config.get_value("e-mail.e-mail"),
                          config.get_value("e-mail.password"),
                          config.get_value("e-mail.smtp"),
                          config.get_value("e-mail.port"))
     file_sender = Sender()
-    email_sender.send_email(config.get_value("e-mail.e-mail"), date_time=time_duration)
+    random.seed()
     with open(file_path, "rb") as file:
         file_sender.send_standard_file(config.get_value("file_server.ipv4"),
                                        config.get_value("file_server.port"),
                                        time_duration + ".mp4",
                                        file.read())
+    images = []
+    video = cv2.VideoCapture(file_path)
+    bbs_count = len(bbs) - 1
+    print(bbs_count)
+    print(bbs)
+    if bbs_count > -1:
+        for _ in range(2):
+            frame = random.randrange(bbs_count)
+            video.set(cv2.CAP_PROP_POS_FRAMES, bbs[frame][1])
+            state, image = video.read()
+            state, jpeg_image = cv2.imencode(".jpeg", image, (cv2.IMWRITE_JPEG_QUALITY, 90))
+            images.append(jpeg_image.tobytes())
+    email_sender.send_email(config.get_value("e-mail.e-mail"), date_time=time_duration, jpg_images=images)
 
 
 def init_arg_parse():
