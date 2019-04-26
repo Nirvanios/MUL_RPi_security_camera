@@ -6,18 +6,18 @@
     "password": "pass"
   },
   "cv": {
-    "min_area": 0,
-    "max_area": 0,
-    "threshold": 0,
-    "min_ratio": 0.0,
-    "max_ratio": 0.0,
-    "bb_max_distance": 0,
+    "min_area": 1000,
+    "max_area": 40000,
+    "threshold": 5,
+    "min_ratio": 0.3,
+    "max_ratio": 0.8,
+    "bb_max_distance": 90,
     "resolution": {
-      "width": 640,
+      "width": 480,
       "height": 480
     },
     "lost_frames_max": 20
   },
-  "save_location": "path",
+  "save_location": "/home/pi/Desktop/out/",
   "debug": true
 }

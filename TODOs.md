@@ -1,12 +1,12 @@
 # TODO list
 ## CV
 * [x] Person recognition
-    * [ ] Interpolate tracking when lost `WIP peťa`
+    * [ ] Interpolate tracking when lost `NOPE`
 * [ ] Face detection `NOPE`
 ## Various
-* [ ] Video from RPi cam `WIP peťa`
+* [x] Video from RPi cam
 * [ ] Send notification
-    * [ ] Whole body shot `WIP peťa`
+    * [ ] Whole body shot 
     * [ ] Face `NOPE`
     * [x] Date & time
 * [ ] Sound alarm
@@ -14,8 +14,8 @@
     * [ ] Melody? `NOPE`
 * [x] Config file 
     * [x] Config object
-* [ ] Threads
-    * [ ] Camera & detection `TODO test`
+* [x] Threads
+    * [x] Camera & detection
     * [ ] File saving & network `File saving done, network todo igor`
 ## Image server
 * [ ] Image server

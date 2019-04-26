@@ -3,14 +3,16 @@ import json
 
 class Config:
     def __init__(self, path_to_file: str):
-        """Load JSON config file into inner dictionary.
+        """
+        Load JSON config file into inner dictionary.
         """
         json_file = open(path_to_file)
         json_content = json_file.read()
         self.__config = json.loads(json_content)
 
     def get_value(self, key: str):
-        """Get value from config.
+        """
+        Get value from config.
 
         Divide nested keys via dot notation (key1.key2.key3)
         """
