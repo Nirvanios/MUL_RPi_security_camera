@@ -11,6 +11,7 @@ class Sender:
         Initialize socket.
         """
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(10.0)
 
     def send_zip(self, remote_ipv4, remote_port, zip_file: bytes):
         """

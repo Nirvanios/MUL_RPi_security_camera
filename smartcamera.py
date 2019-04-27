@@ -177,8 +177,6 @@ def on_saving_done(config: mulconfig.Config, file_path: str, start_time, end_tim
     images = []
     video = cv2.VideoCapture(file_path)
     bbs_count = len(bbs) - 1
-    print(bbs_count)
-    print(bbs)
     if bbs_count > -1:
         for _ in range(2):
             frame = random.randrange(bbs_count)
