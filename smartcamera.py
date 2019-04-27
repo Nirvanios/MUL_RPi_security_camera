@@ -1,8 +1,9 @@
 import argparse
 import datetime
 import math
-import threading
 import random
+import socket
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from queue import Queue
@@ -14,10 +15,10 @@ import mulconfig
 import npcamera
 import tracking
 import videoutils
-from logger import logger_instance as l, LogLevel
-from emailsender import Email
 from Remote_server.Sender import Sender
 from buzzer import Buzzer
+from emailsender import Email
+from logger import logger_instance as l, LogLevel
 
 
 class QueueItem(Enum):
@@ -165,11 +166,14 @@ def on_saving_done(config: mulconfig.Config, file_path: str, start_time, end_tim
                          config.get_value("e-mail.port"))
     file_sender = Sender()
     random.seed()
-    with open(file_path, "rb") as file:
-        file_sender.send_standard_file(config.get_value("file_server.ipv4"),
-                                       config.get_value("file_server.port"),
-                                       time_duration + ".mp4",
-                                       file.read())
+    try:
+        with open(file_path, "rb") as file:
+            file_sender.send_standard_file(config.get_value("file_server.ipv4"),
+                                           config.get_value("file_server.port"),
+                                           time_duration + ".mp4",
+                                           file.read())
+    except socket.error as e:
+        l.log(LogLevel.ERROR, "Send to server has failed. " + e.strerror)
     images = []
     video = cv2.VideoCapture(file_path)
     bbs_count = len(bbs) - 1
@@ -182,7 +186,10 @@ def on_saving_done(config: mulconfig.Config, file_path: str, start_time, end_tim
             state, image = video.read()
             state, jpeg_image = cv2.imencode(".jpeg", image, (cv2.IMWRITE_JPEG_QUALITY, 90))
             images.append(jpeg_image.tobytes())
-    email_sender.send_email(config.get_value("e-mail.e-mail"), date_time=time_duration, jpg_images=images)
+    try:
+        email_sender.send_email(config.get_value("e-mail.e-mail"), date_time=time_duration, jpg_images=images)
+    except Exception:
+        l.log(LogLevel.ERROR, "E-mail sending has failed.")
 
 
 def init_arg_parse():
