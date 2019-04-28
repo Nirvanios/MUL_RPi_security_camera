@@ -11,7 +11,6 @@ class Sender:
         Initialize socket.
         """
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(10.0)
 
     def send_zip(self, remote_ipv4, remote_port, zip_file: bytes):
         """
@@ -24,6 +23,7 @@ class Sender:
         :return: None
         """
         self.socket.connect((remote_ipv4, remote_port))
+        self.socket.settimeout(10.0)
         file_size = len(zip_file)
         self.socket.send(b"FILE/ZIP/" + str(file_size).encode() + b"/tmp.zip")
         response = self.socket.recv(512)
@@ -41,6 +41,7 @@ class Sender:
         :return: None
         """
         self.socket.connect((remote_ipv4, remote_port))
+        self.socket.settimeout(10.0)
         file_size = len(file)
         self.socket.send(b"FILE/STD/" + str(file_size).encode() + b"/" + file_name.encode())
         response = self.socket.recv(512)

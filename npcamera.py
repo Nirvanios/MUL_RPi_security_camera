@@ -1,5 +1,6 @@
 import time
 from typing import Tuple
+
 import numpy as np
 import picamera
 
@@ -16,7 +17,7 @@ class Camera:
         """
         self.__camera = picamera.PiCamera()
         self.__camera.resolution = resolution
-        time.sleep(0.1)
+        time.sleep(1)
 
     def capture_image(self):
         """

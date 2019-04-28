@@ -51,10 +51,8 @@ class ChangeLocator:
         gray = self.prepare_img(img)
         cv2.accumulateWeighted(gray, self.avg_img, 0.5)
         frame_delta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg_img))
-
         thresh = cv2.threshold(frame_delta, self.thresh, 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.dilate(thresh, None, iterations=2)
-
         contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = imutils.grab_contours(contours)
         bbs = []
