@@ -1,5 +1,7 @@
 import argparse
 import datetime
+import os
+
 import math
 import random
 import socket
@@ -188,6 +190,8 @@ def on_saving_done(config: mulconfig.Config, file_path: str, start_time, end_tim
         email_sender.send_email(config.get_value("e-mail.e-mail"), date_time=time_duration, jpg_images=images)
     except Exception:
         l.log(LogLevel.ERROR, "E-mail sending has failed.")
+    finally:
+        os.remove(file_path)
 
 
 def init_arg_parse():

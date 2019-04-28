@@ -33,14 +33,14 @@ class Buzzer:
         GPIO.setup(pin_number, GPIO.OUT)
         self.__pin_number = pin_number
         self.__pwm = GPIO.PWM(self.__pin_number, 2)
+        GPIO.output(self.__pin_number, False)
+        self.__pwm.start(100)
 
     def start_alarm(self):
         """
-        Starts buzzer with frequency 10Hz and duty cycle 50% (1:1).
+        Starts buzzer with frequency 2Hz and duty cycle 50% (1:1).
         :return: None
         """
-        GPIO.output(self.__pin_number, True)
-        self.__pwm.start(10)  # start the PWM on 100  percent duty cycle
         self.__pwm.ChangeDutyCycle(50)  # change the duty cycle to 90%
 
     def stop_alarm(self):
@@ -48,7 +48,7 @@ class Buzzer:
         Stops alarm.
         :return: None
         """
-        self.__pwm.stop()
+        self.__pwm.ChangeDutyCycle(100)
 
     def play_major_scale(self, speed):
         """
@@ -70,5 +70,5 @@ class Buzzer:
         Cleans GPIO
         :return: None
         """
+        self.__pwm.stop()
         GPIO.cleanup()
-
